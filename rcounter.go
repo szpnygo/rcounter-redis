@@ -31,3 +31,8 @@ func (rc *RCounter) Init(Addr string, Password string, DB int) error {
 func (rc *RCounter) GetClient() *redis.Client {
 	return rc.client
 }
+
+// Close ...
+func (rc *RCounter) Close() {
+	rc.client.Close()
+}
