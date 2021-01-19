@@ -1,6 +1,8 @@
 package rcounter
 
 import (
+	"time"
+
 	"github.com/go-redis/redis"
 )
 
@@ -35,4 +37,28 @@ func (rc *RCounter) GetClient() *redis.Client {
 // Close ...
 func (rc *RCounter) Close() {
 	rc.client.Close()
+}
+
+// Del delete the event
+func (rc *RCounter) Del(keys ...string) {
+	rc.client.Del(keys...)
+}
+
+// Expire expire key
+func (rc *RCounter) Expire(key string, expiration time.Duration) {
+	rc.client.Expire(key, expiration)
+}
+
+// Exists if key exists
+func (rc *RCounter) Exists(key string) bool {
+	num, err := rc.client.Exists(key).Result()
+	if err == nil && num == 1 {
+		return true
+	}
+	return false
+}
+
+// TTL get the key expire time
+func (rc *RCounter) TTL(key string) (time.Duration, error) {
+	return rc.client.TTL(key).Result()
 }
