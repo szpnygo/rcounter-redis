@@ -9,12 +9,14 @@ import (
 // RCounter ...
 type RCounter struct {
 	client *redis.Client
+	Prefix string
 }
 
 // NewRCounter ...
 func NewRCounter(Addr string, Password string, DB int) *RCounter {
 	rcounter := RCounter{}
 	rcounter.Init(Addr, Password, DB)
+	rcounter.Prefix = "rcounter_"
 	return &rcounter
 }
 
@@ -39,19 +41,27 @@ func (rc *RCounter) Close() {
 	rc.client.Close()
 }
 
+func (rc *RCounter) getKey(key string) string {
+	return rc.Prefix + key
+}
+
 // Del delete the event
 func (rc *RCounter) Del(keys ...string) {
-	rc.client.Del(keys...)
+	newKeys := []string{}
+	for _, key := range keys {
+		newKeys = append(newKeys, rc.getKey(key))
+	}
+	rc.client.Del(newKeys...)
 }
 
 // Expire expire key
 func (rc *RCounter) Expire(key string, expiration time.Duration) {
-	rc.client.Expire(key, expiration)
+	rc.client.Expire(rc.getKey(key), expiration)
 }
 
 // Exists if key exists
 func (rc *RCounter) Exists(key string) bool {
-	num, err := rc.client.Exists(key).Result()
+	num, err := rc.client.Exists(rc.getKey(key)).Result()
 	if err == nil && num == 1 {
 		return true
 	}
@@ -60,5 +70,5 @@ func (rc *RCounter) Exists(key string) bool {
 
 // TTL get the key expire time
 func (rc *RCounter) TTL(key string) (time.Duration, error) {
-	return rc.client.TTL(key).Result()
+	return rc.client.TTL(rc.getKey(key)).Result()
 }
