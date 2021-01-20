@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"neobaran.com/neo/rcounter"
+	rcounter "github.com/szpnygo/rcounter-redis"
 )
 
 var rCounter *rcounter.RCounter

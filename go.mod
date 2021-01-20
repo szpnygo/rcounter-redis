@@ -1,4 +1,4 @@
-module neobaran.com/neo/rcounter
+module github.com/szpnygo/rcounter-redis
 
 go 1.15
 
