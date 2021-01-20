@@ -1,6 +1,8 @@
 package rcounter
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -8,8 +10,9 @@ import (
 
 // RCounter ...
 type RCounter struct {
-	client *redis.Client
-	Prefix string
+	client     *redis.Client
+	Prefix     string //redis prefix前缀
+	AutoDelete bool   //auto delete the sorted set expired keys
 }
 
 // NewRCounter ...
@@ -86,4 +89,10 @@ func (rc *RCounter) getKey(key string) string {
 
 func (rc *RCounter) saveKey(key string) {
 	rc.client.SAdd("rcount_keys_list", key)
+}
+
+func (rc *RCounter) md5(content string) string {
+	h := md5.New()
+	h.Write([]byte(content))
+	return hex.EncodeToString(h.Sum(nil))
 }
