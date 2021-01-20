@@ -4,13 +4,15 @@ import (
 	"strconv"
 )
 
-// AddCount ...
+// AddCount 简单计数
 func (rc *RCounter) AddCount(key string) (int64, error) {
+	go rc.saveKey(key)
 	return rc.client.Incr(rc.getKey(key)).Result()
 }
 
-// AddCountUnique count unique event
+// AddCountUnique count unique event 按照非重复计数
 func (rc *RCounter) AddCountUnique(key string, event string) (int64, error) {
+	go rc.saveKey(key)
 	return rc.client.SAdd(rc.getKey(key), event).Result()
 }
 

@@ -41,10 +41,6 @@ func (rc *RCounter) Close() {
 	rc.client.Close()
 }
 
-func (rc *RCounter) getKey(key string) string {
-	return rc.Prefix + key
-}
-
 // Del delete the event
 func (rc *RCounter) Del(keys ...string) {
 	newKeys := []string{}
@@ -71,4 +67,23 @@ func (rc *RCounter) Exists(key string) bool {
 // TTL get the key expire time
 func (rc *RCounter) TTL(key string) (time.Duration, error) {
 	return rc.client.TTL(rc.getKey(key)).Result()
+}
+
+// DeleteAll delete all the keys user add include the rcount_keys_list
+func (rc *RCounter) DeleteAll() {
+	list, _ := rc.client.SMembers("rcount_keys_list").Result()
+	keys := []string{}
+	for _, key := range list {
+		keys = append(keys, rc.getKey(key))
+	}
+	keys = append(keys, "rcount_keys_list")
+	rc.client.Del(keys...)
+}
+
+func (rc *RCounter) getKey(key string) string {
+	return rc.Prefix + key
+}
+
+func (rc *RCounter) saveKey(key string) {
+	rc.client.SAdd("rcount_keys_list", key)
 }
